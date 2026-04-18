@@ -20,10 +20,11 @@ export default async function handler(req, res) {
   // Debug endpoint - visit /v1/chat/completions?debug=1 in browser
   if (req.method === 'GET' && req.query.debug) {
     try {
+      const testModel = req.query.model || 'meta/llama-3.1-8b-instruct';
       const testResponse = await axios.post(
         'https://integrate.api.nvidia.com/v1/chat/completions',
         {
-          model: 'deepseek-ai/deepseek-v3_2',
+          model: testModel,
           messages: [{ role: 'user', content: 'say hi' }],
           max_tokens: 10
         },
