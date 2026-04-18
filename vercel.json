@@ -1,3 +1,4 @@
+
 {
   "version": 2,
   "builds": [
@@ -7,9 +8,9 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
+    { "src": "/health", "dest": "server.js" },
+    { "src": "/v1/models", "dest": "server.js" },
+    { "src": "/v1/chat/completions", "dest": "server.js" },
+    { "src": "/(.*)", "dest": "server.js" }
   ]
 }
