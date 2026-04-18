@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const NIM_API_BASE = 'https://integrate.api.nvidia.com/v1';
+const NIM_API_BASE = 'https://integrate.api.nvidia.com/v1/chat/completions';
 const NIM_API_KEY = process.env.NIM_API_KEY;
 
 const MODEL_MAPPING = {
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       stream: false // Vercel serverless doesn't support streaming well
     };
 
-    const response = await axios.post(`${NIM_API_BASE}/chat/completions`, nimRequest, {
+    const response = await axios.post(NIM_API_BASE, nimRequest, {
       headers: {
         'Authorization': `Bearer ${NIM_API_KEY}`,
         'Content-Type': 'application/json'
