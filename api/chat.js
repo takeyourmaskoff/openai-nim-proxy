@@ -1,6 +1,5 @@
 const axios = require('axios');
 
-const NIM_API_BASE = 'https://integrate.api.nvidia.com/v1/chat/completions';
 const NIM_API_KEY = process.env.NIM_API_KEY;
 
 const MODEL_MAPPING = {
@@ -12,14 +11,47 @@ const MODEL_MAPPING = {
 };
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Health check
+  // Debug endpoint - visit /v1/chat/completions?debug=1 in browser
+  if (req.method === 'GET' && req.query.debug) {
+    try {
+      const testResponse = await axios.post(
+        'https://integrate.api.nvidia.com/v1/chat/completions',
+        {
+          model: 'deepseek-ai/deepseek-v3_2',
+          messages: [{ role: 'user', content: 'say hi' }],
+          max_tokens: 10
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${NIM_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return res.json({
+        success: true,
+        api_key_set: !!NIM_API_KEY,
+        api_key_prefix: NIM_API_KEY ? NIM_API_KEY.substring(0, 8) + '...' : 'NOT SET',
+        nvidia_response: testResponse.data
+      });
+    } catch (err) {
+      return res.json({
+        success: false,
+        api_key_set: !!NIM_API_KEY,
+        api_key_prefix: NIM_API_KEY ? NIM_API_KEY.substring(0, 8) + '...' : 'NOT SET',
+        error: err.message,
+        nvidia_status: err.response?.status,
+        nvidia_detail: err.response?.data
+      });
+    }
+  }
+
   if (req.method === 'GET') {
     return res.json({ status: 'ok', service: 'OpenAI to NVIDIA NIM Proxy' });
   }
@@ -29,27 +61,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { model, messages, temperature, max_tokens, stream } = req.body;
+    const { model, messages, temperature, max_tokens } = req.body;
 
-    // Model mapping with fallback
-    let nimModel = MODEL_MAPPING[model] || 'deepseek-ai/deepseek-v3_2';
+    const nimModel = MODEL_MAPPING[model] || 'deepseek-ai/deepseek-v3_2';
 
-    const nimRequest = {
-      model: nimModel,
-      messages,
-      temperature: temperature || 0.6,
-      max_tokens: max_tokens || 9024,
-      stream: false // Vercel serverless doesn't support streaming well
-    };
-
-    const response = await axios.post(NIM_API_BASE, nimRequest, {
-      headers: {
-        'Authorization': `Bearer ${NIM_API_KEY}`,
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      'https://integrate.api.nvidia.com/v1/chat/completions',
+      {
+        model: nimModel,
+        messages,
+        temperature: temperature || 0.6,
+        max_tokens: max_tokens || 9024,
+        stream: false
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${NIM_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
 
-    // Return OpenAI-compatible response
     return res.json({
       id: `chatcmpl-${Date.now()}`,
       object: 'chat.completion',
@@ -71,13 +103,9 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Proxy error:', error.message);
-    console.error('NVIDIA response:', JSON.stringify(error.response?.data));
-    console.error('NVIDIA status:', error.response?.status);
-    console.error('Model used:', error.config?.data);
     return res.status(error.response?.status || 500).json({
       error: {
-        message: error.message || 'Internal server error',
+        message: error.message,
         type: 'invalid_request_error',
         nvidia_detail: error.response?.data || 'no detail',
         nvidia_status: error.response?.status || 'unknown'
