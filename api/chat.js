@@ -9,7 +9,6 @@ const MODEL_MAPPING = {
   'kimi-k2.5': 'moonshotai/kimi-k2.5',
   'deepseek-v3.2': 'deepseek-ai/deepseek-v3_2',
   'kimi-k2-instruct': 'moonshotai/kimi-k2-instruct-0905b'
-
 };
 
 export default async function handler(req, res) {
@@ -33,17 +32,7 @@ export default async function handler(req, res) {
     const { model, messages, temperature, max_tokens, stream } = req.body;
 
     // Model mapping with fallback
-    let nimModel = MODEL_MAPPING[model];
-    if (!nimModel) {
-      const m = model.toLowerCase();
-      if (m.includes('gpt-4') || m.includes('claude-opus')) {
-        nimModel = 'meta/llama-3.1-405b-instruct';
-      } else if (m.includes('claude') || m.includes('gemini') || m.includes('70b')) {
-        nimModel = 'meta/llama-3.1-70b-instruct';
-      } else {
-        nimModel = 'meta/llama-3.1-8b-instruct';
-      }
-    }
+    let nimModel = MODEL_MAPPING[model] || 'deepseek-ai/deepseek-v3_2';
 
     const nimRequest = {
       model: nimModel,
@@ -83,10 +72,15 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Proxy error:', error.message);
+    console.error('NVIDIA response:', JSON.stringify(error.response?.data));
+    console.error('NVIDIA status:', error.response?.status);
+    console.error('Model used:', error.config?.data);
     return res.status(error.response?.status || 500).json({
       error: {
         message: error.message || 'Internal server error',
-        type: 'invalid_request_error'
+        type: 'invalid_request_error',
+        nvidia_detail: error.response?.data || 'no detail',
+        nvidia_status: error.response?.status || 'unknown'
       }
     });
   }
