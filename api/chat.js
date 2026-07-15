@@ -5,7 +5,7 @@ const MODEL_MAPPING = {
   'kimi-k2-thinking': 'moonshotai/kimi-k2-thinking',
   'glm-4.7': 'z-ai/glm-4.7',
   'kimi-k2.6': 'moonshotai/kimi-k2.6',
-  'glm-5.1': 'z-ai/glm-5.1',
+  'glm-5.2': 'z-ai/glm-5.2',
   'deepseek-v4-pro': 'deepseek-ai/deepseek-v4-pro',
   'deepseek-v4-flash': 'deepseek-ai/deepseek-v4-flash'
 };
