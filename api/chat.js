@@ -2,8 +2,8 @@ const axios = require('axios');
 const NIM_API_KEY = process.env.NIM_API_KEY;
 
 const MODEL_MAPPING = {
-  'kimi-k2-thinking': 'moonshotai/kimi-k2-thinking',
-  'glm-4.7': 'z-ai/glm-4.7',
+  'nemotron2': 'nvidia/nemotron-3.5-lightning-30b-a3b',
+  'nemotron1': 'nvidia/nemotron-3-ultra-550b-a55b',
   'kimi-k2.6': 'moonshotai/kimi-k2.6',
   'glm-5.2': 'z-ai/glm-5.2',
   'deepseek-v4-pro': 'deepseek-ai/deepseek-v4-pro',
