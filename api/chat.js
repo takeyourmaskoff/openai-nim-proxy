@@ -4,10 +4,10 @@ const NIM_API_KEY = process.env.NIM_API_KEY;
 const MODEL_MAPPING = {
   'nemotron2': 'nvidia/nemotron-3.5-lightning-30b-a3b',
   'nemotron1': 'nvidia/nemotron-3.5-super-vl-120b-a12b',
-  'kimi-k3': 'moonshotai/kimi-k3',
+  'kimi-k3': 'nvidia/nemotron-3-ultra-550b-a55b',
   'glm': 'z-ai/glm-5.3',
   'glm-flash': 'z-ai/glm-5.3-flash',
-  'deepseek-v4-flash': 'deepseek-ai/deepseek-v4-flash-0731'
+  'deepseek-flash': 'deepseek-ai/deepseek-v4.1-flash'
 };
 
 export default async function handler(req, res) {
